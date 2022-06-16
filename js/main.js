@@ -17,7 +17,7 @@ const svg = d3.selectAll("#chart-area").append("svg")
 
 const g = svg.append("g")
 			.attr("transform", `translate(${MARGIN.LEFT}, ${MARGIN.TOP})`)
-
+// Scales (except r that is dependant from the data gathered)
 const x = d3.scaleLog()
 		.domain([100, 150000])
 		.range([0, WIDTH])
@@ -27,6 +27,33 @@ const y = d3.scaleLinear()
 		.range([HEIGHT, 0])
 
 const continentColor = d3.scaleOrdinal(d3.schemePastel1)
+
+
+// Labels
+
+const xAxisLabel = g.append("text")
+					.attr("class", "x axis-label")
+					.attr("y", HEIGHT + 55)
+					.attr("x", WIDTH / 2 - 65)
+					.attr("font-size", "20px")
+					.text("GDP Per Capita ($)")
+
+const yAxisLabel = g.append("text")
+					.attr("class", "y axis-label")
+					.attr("transform", "rotate(-90)")
+					.attr("x", -(HEIGHT / 2 + 110))
+					.attr("y", -55)
+					.attr("font-size", "20px")
+					.text("Life Expectancy (Years)")
+
+const yearLabel = g.append("text")
+					.attr("class", "year-label")
+					.attr("x", WIDTH - 82)
+					.attr("y", HEIGHT - 5)
+					.attr("font-size", "40px")
+					.attr("fill", "grey")
+					.attr("font", "Ubuntu")
+					.text("1800")
 
 d3.json("data/data.json").then(function(data){
 	data.forEach(d => {
@@ -49,7 +76,7 @@ d3.json("data/data.json").then(function(data){
 		return d3.max(d.countries, p => p.population)
 	})])
 	.range([5, 25])
-	
+
 	const xAxisCall = d3.axisBottom(x)
 						.tickValues([400, 4000, 40000])
 						.tickFormat(d3.format("$"))
@@ -68,7 +95,7 @@ d3.json("data/data.json").then(function(data){
 
 	function update(data) {
 		const nowData = data[flag] 
-		const t = d3.transition(0)
+		const t = d3.transition().duration(100)
 
 		const circles = g.selectAll("circle")
 						.data(nowData.countries)
@@ -77,11 +104,13 @@ d3.json("data/data.json").then(function(data){
 
 		circles
 			.enter().append("circle")
+			.attr("fill", d => continentColor(d.continent))
 			.merge(circles)
 			.transition(t)
 			.attr("r", d => r(d.population))
-			.attr("fill", d => continentColor(d.continent))
 			.attr("cx", (d) => x(d.income))
 			.attr("cy", d => y(d.life_exp))
+
+		yearLabel.text(nowData.year)
 	}
 })
