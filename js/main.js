@@ -8,6 +8,7 @@ const MARGIN = {LEFT: 100, TOP: 30, RIGHT: 30, BOTTOM: 80}
 const WIDTH = 600 - MARGIN.LEFT - MARGIN.RIGHT
 const HEIGHT = 400 - MARGIN.BOTTOM - MARGIN.TOP
 
+const continents = ["europe", "asia", "africa", "americas"]
 let flag = 0
 
 
@@ -83,6 +84,26 @@ d3.json("data/data.json").then(function(data){
 	
 	const yAxisCall = d3.axisLeft(y)
 						.tickValues([0, 25, 50, 75])
+
+	const legend = g.append("g")
+					.attr("transform", `translate(${WIDTH - 10}, ${HEIGHT - 125})`)
+
+	continents.forEach((continent, i) => {
+		const legendRow = legend.append("g")
+							.attr("transform", `translate(0, ${i * 20})`)
+
+		legendRow.append("rect")
+				.attr("width", 10)
+				.attr("height", 10)
+				.attr("fill", continentColor(continent))
+
+		legendRow.append("text")
+		.attr("x", -10)
+		.attr("y", 10)
+		.attr("text-anchor", "end")
+		.style("text-transform", "capitalize")
+		.text(continent)
+	})
 
 	const xAxisGroup = g.append("g")
 							.attr("transform", `translate(0, ${HEIGHT})`)
