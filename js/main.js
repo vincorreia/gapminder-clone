@@ -18,6 +18,18 @@ const svg = d3.selectAll("#chart-area").append("svg")
 
 const g = svg.append("g")
 			.attr("transform", `translate(${MARGIN.LEFT}, ${MARGIN.TOP})`)
+
+const tooltip = d3.tip()
+					.attr("class", "d3-tip")
+					.html(d => {
+						return `<strong>Continent:</strong> <span style="color: red; text-transform: capitalize">${d.continent}</span><br>
+						<strong>Country:</strong> <span style="color: red">${d.country}</span><br>
+						<strong>GDP per Capita:</strong> <span style="color: red">${d3.format("$,.0f")(d.income)}</span><br>
+						<strong>Life Expectation:</strong> <span style="color: red">${d3.format(".2f")(d.life_exp)}</span><br>
+						<strong>Population:</strong> <span style="color: red">${d3.format(",.0f")(d.population)}</span><br>`
+					})
+
+g.call(tooltip)
 // Scales (except r that is dependant from the data gathered)
 const x = d3.scaleLog()
 		.domain([100, 150000])
@@ -126,6 +138,8 @@ d3.json("data/data.json").then(function(data){
 		circles
 			.enter().append("circle")
 			.attr("fill", d => continentColor(d.continent))
+			.on("mouseover", tooltip.show)
+			.on("mouseout", tooltip.hide)
 			.merge(circles)
 			.transition(t)
 			.attr("r", d => r(d.population))
