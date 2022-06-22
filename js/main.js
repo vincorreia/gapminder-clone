@@ -10,6 +10,7 @@ const HEIGHT = 400 - MARGIN.BOTTOM - MARGIN.TOP
 
 const continents = ["europe", "asia", "africa", "americas"]
 let flag = 0
+let interval
 
 
 const svg = d3.selectAll("#chart-area").append("svg")
@@ -75,14 +76,38 @@ d3.json("data/data.json").then(function(data){
 	console.log(data)
 
 	d3.interval(() => {
-		if(flag <= 213){
+/* 		if(flag <= 213){
 		flag++
 		}
 		else{
 			flag = 0
 		}
-		update(data)
+		update(data) */
 	}, 500)
+
+function step() {
+	flag = flag <= 213 ? flag + 1 : 0
+	update(data)
+}
+
+$("#play-button")
+	.on("click", function () {
+		const button = $(this)
+
+		if(button.text() === "Play"){
+		button.text("Pause")
+		interval = setInterval(step, 100)
+		} else {
+		button.text("Play")
+		clearInterval(interval)
+		}
+	})
+
+$("#reset-button")
+	.on("click", () => {
+		flag = 0
+		update(data[flag])
+	})
 
 	const r = d3.scaleSqrt()
 	.domain([0, d3.max(data, d => {
@@ -127,11 +152,13 @@ d3.json("data/data.json").then(function(data){
 						.call(yAxisCall)
 
 	function update(data) {
-		const nowData = data[flag] 
-		const t = d3.transition().duration(100)
+		const nowData = data[flag]
+		const t = d3.transition()
+					.duration(100)
 
+		
 		const circles = g.selectAll("circle")
-						.data(nowData.countries)
+						.data(nowData.countries, d => d.country)
 		
 		circles.exit().remove()
 
@@ -146,6 +173,6 @@ d3.json("data/data.json").then(function(data){
 			.attr("cx", (d) => x(d.income))
 			.attr("cy", d => y(d.life_exp))
 
-		yearLabel.text(nowData.year)
+		yearLabel.text(data.year)
 	}
 })
