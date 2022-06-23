@@ -75,16 +75,6 @@ d3.json("data/data.json").then(function(data){
 	})
 	console.log(data)
 
-	d3.interval(() => {
-/* 		if(flag <= 213){
-		flag++
-		}
-		else{
-			flag = 0
-		}
-		update(data) */
-	}, 500)
-
 function step() {
 	flag = flag <= 213 ? flag + 1 : 0
 	update(data)
@@ -106,15 +96,30 @@ $("#play-button")
 $("#reset-button")
 	.on("click", () => {
 		flag = 0
-		update(data[flag])
+		update(data)
 	})
 
+
+$("#continent-select")
+	.on("change", () => {
+		update(data)
+	})
+	
+$("#date-slider").slider({
+		min: 1800,
+		max: 2014,
+		step: 1,
+		slide: (event, ui) => {
+			flag = ui.value - 1800
+			update(data)
+		}
+	})
 	const r = d3.scaleSqrt()
 	.domain([0, d3.max(data, d => {
 		return d3.max(d.countries, p => p.population)
 	})])
 	.range([5, 25])
-
+	
 	const xAxisCall = d3.axisBottom(x)
 						.tickValues([400, 4000, 40000])
 						.tickFormat(d3.format("$"))
@@ -156,9 +161,19 @@ $("#reset-button")
 		const t = d3.transition()
 					.duration(100)
 
+		const continent = $("#continent-select").val()
+
+		const filteredData = nowData.countries.filter(d => {
+			if(continent == "all"){
+				return true
+			}
+			else {
+				return d.continent === continent
+			}
+		})
 		
 		const circles = g.selectAll("circle")
-						.data(nowData.countries, d => d.country)
+						.data(filteredData, d => d.country)
 		
 		circles.exit().remove()
 
@@ -173,6 +188,8 @@ $("#reset-button")
 			.attr("cx", (d) => x(d.income))
 			.attr("cy", d => y(d.life_exp))
 
-		yearLabel.text(data.year)
+		yearLabel.text(nowData.year)
+		$("#year")[0].innerHTML = nowData.year
+		$("#date-slider").slider("value", Number(flag + 1800))
 	}
 })
